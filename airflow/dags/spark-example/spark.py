@@ -11,6 +11,7 @@ from airflow.providers.cncf.kubernetes.sensors.spark_kubernetes import SparkKube
 # --- Config (override via Airflow Variables if you like) ---
 SPARK_NAMESPACE = Variable.get("SPARK_NAMESPACE", default_var="spark-operator")
 SPARK_APP_NAME = Variable.get("SPARK_APP_NAME", default_var="osds-spark-app")
+
 # Path to the folder that contains your YAML (resolved relative to this DAG file)
 _THIS_DIR = os.path.dirname(__file__)
 TEMPLATE_DIR = os.path.join(_THIS_DIR, "spark-example")  # contains spark-app.yaml
@@ -24,7 +25,9 @@ default_args = {
 
 with DAG(
     dag_id="spark_on_k8s_airflow",
-    start_date=timezone.datetime(2025, 8, 24, tz="UTC"),  # static, tz-aware
+    # static, tz-aware start date
+    start_date=timezone.datetime(2025, 8, 24, tzinfo=timezone.utc),  # ✅ tzinfo, not tz
+    # (alternatively) dynamic: start_date=timezone.utcnow() - timedelta(days=1),
     schedule="@daily",
     catchup=False,
     default_args=default_args,
@@ -39,7 +42,7 @@ with DAG(
         application_file=APP_FILE,              # resolved via template_searchpath
         namespace=SPARK_NAMESPACE,
         kubernetes_conn_id="kubernetes_default",
-        do_xcom_push=False,                     # IMPORTANT: no XCom sidecar for SparkApplication
+        do_xcom_push=False,                     # avoid XCom sidecar for SparkApplication
     )
 
     # Wait until the SparkApplication reaches COMPLETED/FAILED and stream driver logs
