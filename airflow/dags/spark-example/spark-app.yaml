@@ -5,7 +5,7 @@ metadata:
   name: "{{ params.spark_app_name }}"
   namespace: "{{ params.spark_namespace }}"
 spec:
-  timeToLiveSeconds: 600           # keep CR ~10 minutes after finish
+  timeToLiveSeconds: 600
   type: Python
   pythonVersion: "3"
   mode: cluster
