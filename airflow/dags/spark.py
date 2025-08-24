@@ -19,7 +19,7 @@ dag = DAG(
     # start_date=timezone.datetime(2025, 8, 23, tz="UTC"),
     catchup=False,
     schedule="@daily",                  # (equivalent shorthand)
-    template_searchpath='/opt/airflow/dags/repo/dags/spark-example/',
+    # template_searchpath='/opt/airflow/dags/repo/dags',
     default_args=default_args,
 )
 
@@ -28,7 +28,7 @@ spark_k8s_task = SparkKubernetesOperator(
     trigger_rule="all_success",
     depends_on_past=False,
     retries=0,
-    application_file='spark-app.yaml',
+    application_file='spark-example/spark-app.yaml',
     namespace="spark-operator",
     kubernetes_conn_id="kubernetes_default",
     do_xcom_push=True,
