@@ -27,7 +27,7 @@ with DAG(
     template_searchpath=[TEMPLATE_DIR],
     params={
         "spark_namespace": "spark-operator",
-        "spark_image": "docker.io/library/spark:4.0.0s",
+        "spark_image": "docker.io/library/spark:4.0.0",
         "executor_instances": 1,
         "app_suffix": "",          
         "main_file": "local:///opt/spark/examples/src/main/python/pi.py",
