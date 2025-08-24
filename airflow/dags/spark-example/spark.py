@@ -1,3 +1,12 @@
+from datetime import timedelta
+import os
+from airflow import DAG
+from airflow.models import Variable
+from airflow.utils import timezone
+from airflow.providers.cncf.kubernetes.operators.spark_kubernetes import SparkKubernetesOperator
+from airflow.providers.cncf.kubernetes.sensors.spark_kubernetes import SparkKubernetesSensor
+
+
 with DAG(
     dag_id="spark_on_k8s_airflow",
     start_date=timezone.datetime(2025, 8, 24, tzinfo=timezone.utc),
