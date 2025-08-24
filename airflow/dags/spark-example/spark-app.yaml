@@ -7,6 +7,7 @@ spec:
   type: Python
   pythonVersion: "3"
   mode: cluster
+  timeToLiveSeconds: 600 
   image: "{{ params.spark_image | default('osds-spark8s') }}"
   imagePullPolicy: IfNotPresent
   mainApplicationFile: "{{ params.main_file | default('local:///opt/spark/examples/src/main/python/pi.py') }}"

@@ -38,22 +38,21 @@ with DAG(
 
     submit_spark = SparkKubernetesOperator(
         task_id="submit_spark",
-        name="submit-spark",                     # keep this constant (do not template)
-        application_file=APP_FILE,               # YAML will be Jinja-rendered
+        application_file=APP_FILE,
         namespace="{{ params.spark_namespace }}",
         kubernetes_conn_id="kubernetes_default",
-        do_xcom_push=False,                      # no XCom sidecar for SparkApplication
+        application_name="{{ params.spark_app_name }}",   # <-- force exact CR name
+        do_xcom_push=True,                                # optional but handy
     )
 
     wait_for_spark = SparkKubernetesSensor(
         task_id="wait_for_spark",
-        application_name="{{ params.spark_app_name }}", 
+        application_name="{{ ti.xcom_pull(task_ids='submit_spark') or params.spark_app_name }}",
         namespace="{{ params.spark_namespace }}",
         kubernetes_conn_id="kubernetes_default",
         attach_log=True,
         mode="reschedule",
         poke_interval=15,
-        timeout=60 * 60,
+        timeout=60*60,
     )
-
     submit_spark >> wait_for_spark
