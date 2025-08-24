@@ -1,8 +1,8 @@
 apiVersion: sparkoperator.k8s.io/v1beta2
 kind: SparkApplication
 metadata:
-  name: spark-pi-python
-  namespace: spark-operator
+  name: "{{ params.app_name }}"   
+  namespace: "{{ params.spark_namespace | default('spark-operator') }}"
 spec:
   type: Python
   pythonVersion: "3"

@@ -1,60 +1,49 @@
-# airflow/dags/spark.py
+# airflow/dags/spark-example/spark.py
 from datetime import timedelta
 import os
-
 from airflow import DAG
 from airflow.models import Variable
 from airflow.utils import timezone
 from airflow.providers.cncf.kubernetes.operators.spark_kubernetes import SparkKubernetesOperator
 from airflow.providers.cncf.kubernetes.sensors.spark_kubernetes import SparkKubernetesSensor
 
-# --- Config (override via Airflow Variables if you like) ---
 SPARK_NAMESPACE = Variable.get("SPARK_NAMESPACE", default_var="spark-operator")
-SPARK_APP_NAME = Variable.get("SPARK_APP_NAME", default_var="osds-spark-app")
-
-# Path to the folder that contains your YAML (resolved relative to this DAG file)
 _THIS_DIR = os.path.dirname(__file__)
-TEMPLATE_DIR = os.path.join(_THIS_DIR, "spark-example")  # contains spark-app.yaml
-APP_FILE = "spark-app.yaml"  # file lives inside TEMPLATE_DIR
+TEMPLATE_DIR = os.path.join(_THIS_DIR, "spark-example")
+APP_FILE = "spark-app.yaml"
 
-default_args = {
-    "owner": "Howdy",
-    "retries": 3,
-    "retry_delay": timedelta(minutes=5),
-}
+default_args = {"owner": "Howdy", "retries": 0, "retry_delay": timedelta(minutes=5)}  # retries=0 while debugging
+
+APP_NAME_TPL = "{{ dag.dag_id }}-{{ ts_nodash | lower }}"   # unique name per run
 
 with DAG(
     dag_id="spark_on_k8s_airflow",
-    # static, tz-aware start date
-    start_date=timezone.datetime(2025, 8, 24, tzinfo=timezone.utc),  # ✅ tzinfo, not tz
-    # (alternatively) dynamic: start_date=timezone.utcnow() - timedelta(days=1),
+    start_date=timezone.datetime(2025, 8, 24, tzinfo=timezone.utc),
     schedule="@daily",
     catchup=False,
     default_args=default_args,
-    # Make Jinja lookups find the YAML reliably regardless of deployment path
     template_searchpath=[TEMPLATE_DIR],
     tags=["spark", "kubernetes", "spark-operator"],
 ) as dag:
 
-    # Submit the SparkApplication CR (defined in spark-app.yaml)
-    spark_submit = SparkKubernetesOperator(
+    submit_spark = SparkKubernetesOperator(
         task_id="submit_spark",
-        application_file=APP_FILE,              # resolved via template_searchpath
+        application_file=APP_FILE,
         namespace=SPARK_NAMESPACE,
         kubernetes_conn_id="kubernetes_default",
-        do_xcom_push=False,                     # avoid XCom sidecar for SparkApplication
+        params={"app_name": APP_NAME_TPL, "spark_namespace": SPARK_NAMESPACE},
+        do_xcom_push=True,   # safe here; it’s regular XCom, no sidecar
     )
 
-    # Wait until the SparkApplication reaches COMPLETED/FAILED and stream driver logs
     wait_for_spark = SparkKubernetesSensor(
         task_id="wait_for_spark",
-        application_name=SPARK_APP_NAME,        # must match metadata.name in spark-app.yaml
+        application_name="{{ ti.xcom_pull(task_ids='submit_spark')['metadata']['name'] }}",
         namespace=SPARK_NAMESPACE,
         kubernetes_conn_id="kubernetes_default",
-        attach_log=True,                        # tail driver logs in Airflow
-        poke_interval=15,                       # seconds
-        timeout=60 * 60,                        # 1 hour (tune for your jobs)
-        mode="reschedule",                      # free the worker slot between pokes
+        attach_log=True,
+        poke_interval=15,
+        timeout=60 * 60,
+        mode="reschedule",
     )
 
-    spark_submit >> wait_for_spark
+    submit_spark >> wait_for_spark
