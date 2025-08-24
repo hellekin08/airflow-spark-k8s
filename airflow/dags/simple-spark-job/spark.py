@@ -25,7 +25,7 @@ with DAG(
     template_searchpath=[TEMPLATE_DIR],
     params={
         "spark_namespace": "spark-operator",
-        "spark_image": "mabi/spark-airflowk8s:latest",
+        "spark_image": "mabi/simple-spark-job:latest",
         "executor_instances": 1,
         "app_suffix": "",
         "main_file": "local:///opt/app/spark_job.py",
