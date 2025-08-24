@@ -17,6 +17,7 @@ def main():
         .appName("SimplePySparkETL")
         .getOrCreate()
     )
+    spark.sparkContext.setLogLevel("WARN") 
 
     if args.input:
         # Expecting a CSV with header and columns: date,product,price,quantity
