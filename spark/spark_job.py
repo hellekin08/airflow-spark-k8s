@@ -47,8 +47,8 @@ def main():
     )
 
     # Show a few rows in the driver logs
-    print("Revenue by product:")
-    by_product.show(truncate=False)
+    print("Revenue by product:", flush=True)
+    print(by_product._jdf.showString(20, 0, False), flush=True)  # (
 
     # Write results as Parquet
     by_product.write.mode("overwrite").parquet(args.output)
