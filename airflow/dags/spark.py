@@ -31,7 +31,8 @@ spark_k8s_task = SparkKubernetesOperator(
     application_file='spark-example/spark-app.yaml',
     namespace="spark-operator",
     kubernetes_conn_id="kubernetes_default",
-    do_xcom_push=True,
+    do_xcom_push=False,     # <— disable XCom sidecar
+    get_logs=True,          # stream driver logs to Airflow
     dag=dag,
 )
 
