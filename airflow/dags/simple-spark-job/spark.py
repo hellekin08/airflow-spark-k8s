@@ -17,7 +17,7 @@ default_args = {
 }
 
 with DAG(
-    dag_id="spark_on_k8s_airflow",
+    dag_id="simple_spark_job",
     start_date=timezone.datetime(2025, 8, 24, tzinfo=timezone.utc),
     schedule="@daily",
     catchup=False,
