@@ -1,15 +1,15 @@
 apiVersion: sparkoperator.k8s.io/v1beta2
 kind: SparkApplication
 metadata:
-  name: "{{ params.app_name }}"   
-  namespace: "{{ params.spark_namespace | default('spark-operator') }}"
+  name: "{{ dag.dag_id | replace('_','-') }}-{{ ts_nodash | lower }}"
+  namespace: "{{ var.value.get('SPARK_NAMESPACE', 'spark-operator') }}"
 spec:
   type: Python
   pythonVersion: "3"
   mode: cluster
-  image: docker.io/library/spark:4.0.0
+  image: "{{ params.spark_image | default('osds-spark8s') }}"
   imagePullPolicy: IfNotPresent
-  mainApplicationFile: local:///opt/spark/examples/src/main/python/pi.py
+  mainApplicationFile: "{{ params.main_file | default('local:///opt/spark/examples/src/main/python/pi.py') }}"
   sparkVersion: 4.0.0
   driver:
     coreLimit: "1"
