@@ -31,6 +31,7 @@ with DAG(
         "executor_instances": 1,
         "app_suffix": "",          
         "main_file": "local:///opt/spark/examples/src/main/python/pi.py",
+        "spark_app_name": "spark-on-k8s-airflow",
     },
     tags=["spark", "kubernetes", "spark-operator"],
 ) as dag:
@@ -44,15 +45,9 @@ with DAG(
         do_xcom_push=False,                      # no XCom sidecar for SparkApplication
     )
 
-    # Must match YAML's metadata.name template
-    rendered_app_name = (
-        "{{ dag.dag_id | replace('_','-') }}-{{ ts_nodash | lower }}"
-        "{{ ('-' ~ params.app_suffix) if params.app_suffix else '' }}"
-    )
-
     wait_for_spark = SparkKubernetesSensor(
         task_id="wait_for_spark",
-        application_name=rendered_app_name,
+        application_name="{{ params.spark_app_name }}", 
         namespace="{{ params.spark_namespace }}",
         kubernetes_conn_id="kubernetes_default",
         attach_log=True,
