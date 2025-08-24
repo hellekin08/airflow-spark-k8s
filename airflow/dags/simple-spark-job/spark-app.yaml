@@ -10,7 +10,7 @@ spec:
   pythonVersion: "3"
   mode: cluster
   image: "{{ params.spark_image | default('osds-spark8s') }}"
-  imagePullPolicy: IfNotPresent
+  imagePullPolicy: Always
   mainApplicationFile: "{{ params.main_file | default('local:///opt/spark/examples/src/main/python/pi.py') }}"
   sparkVersion: 4.0.0
   driver:
