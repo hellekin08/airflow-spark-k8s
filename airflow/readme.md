@@ -1,4 +1,5 @@
 https://medium.com/@howdyservices9/executing-spark-operator-using-airflow-on-kubernetes-d5c17de7d376
+https://medium.com/@howdyservices9/executing-spark-operator-using-airflow-on-kubernetes-part-2-62ae8fae7a7a
 
 ```
 helm repo add apache-airflow https://airflow.apache.org

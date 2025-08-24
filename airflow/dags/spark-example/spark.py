@@ -19,7 +19,7 @@ dag = DAG(
     # start_date=timezone.datetime(2025, 8, 23, tz="UTC"),
     catchup=False,
     schedule="@daily",                  # (equivalent shorthand)
-    template_searchpath='/opt/airflow/dags/repo/dags/spark8s/',
+    template_searchpath='/opt/airflow/dags/repo/dags/spark-example/',
     default_args=default_args,
 )
 
